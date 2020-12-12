@@ -1,0 +1,26 @@
+{
+  "name": "audio-books-download-tools",
+  "version": "0.0.1",
+  "description": "web-based app to download audio books from https://www.tingchina.com/",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "audiobook"
+  ],
+  "author": "Nan Li",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "iconv-lite": "^0.6.2",
+    "jsdom": "^16.4.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.6",
+    "progress": "^2.0.3"
+  }
+}
