@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE</title>
+</head>
+<body>
+    <button id ='sse'> create SSE</button>
+    
+</body>
+<script>
+    var __id = 0;
+    let events = new Map();
+
+    const btn = document.querySelector('#sse');
+    btn.addEventListener('click',()=>{
+        const evt = createSSE(__id);
+        events.set(__id,evt);
+        __id++;
+        
+    })
+    function createSSE(id){
+        const url = `http://localhost:3000/api/sse?id=${id}`;
+        const evtSource = new EventSource(url);
+        //
+        const div = document.createElement('div')
+        div.id = id;
+        div.textContent = `${id}: Starting`;
+        document.body.append(div);
+        //
+        evtSource.onmessage = (event) => {
+            const d = JSON.parse(event.data);
+            console.log(d);
+            div.textContent = `${id}: ${d.id},${d.counter},${d.isClosed} `;
+            if(d.isClosed){
+                evtSource.close();
+                div.remove();
+            }
+        }
+        return evtSource;
+    }
+</script>
+</html>

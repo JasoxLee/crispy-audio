@@ -1,0 +1,72 @@
+.summary .list ul {
+  background: url(bglist.gif) left top;
+  width: 513px;
+}
+.summary .list ul li {
+  padding-left: 3px;
+  float: left;
+  width: 167px;
+  height: 25px;
+  line-height: 25px;
+  border-right: 1px solid #d8d6d7;
+}
+.summary .list ul li a {
+  overflow: hidden;
+  width: 160px;
+  height: 14px;
+  white-space: nowrap;
+}
+.summary .list ul li div {
+  float: left;
+}
+.summary .list .title {
+  /* background: url(title03.gif) repeat-x left top; */
+  height: 28px;
+  line-height: 28px;
+  color: #000000;
+  text-align: center;
+  font-weight: bold;
+}
+.summary .list {
+  border: 1px solid #d8d6d7;
+  border-right: none;
+  margin: 0 8px;
+}
+
+.b2 {
+  width: 160px;
+  white-space: normal;
+  text-overflow: clip;
+  overflow: hidden;
+}
+.title .b2 {
+  font-weight: bold;
+}
+.b2 a {
+  overflow: hidden;
+  width: 160px;
+  height: 14px;
+  white-space: nowrap;
+}
+
+.summary .title {
+  background: url(title03.gif) repeat-x left top;
+  height: 31px;
+  line-height: 31px;
+  color: #000000;
+}
+.summary .title .fRight {
+  padding-right: 15px;
+  color: #999999;
+}
+.summary .title strong {
+  padding-left: 25px;
+  color: #008000;
+  background: url(title07.gif) no-repeat 10px;
+  float: left;
+}
+.summary textarea {
+  margin-left: 10px;
+  margin-top: 5px;
+  width: 500px;
+}

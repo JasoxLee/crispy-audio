@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book List</title>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+</head>
+<style>
+  .card {
+    margin: .2rem;
+  }
+  .card-body {
+    padding: 0.5rem;
+  }
+</style>
+
+<body>
+  <div>
+    All<input id="all" type="checkbox" />
+    <div id="download" class="btn btn-primary">download</div>
+    <div id="status"></div>
+  </div>
+  <div id="mainView" class="container-fluid"></div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+  <script src="./util.js"></script>
+</body>
+<script>
+  const statDiv = document.getElementById('status'); 
+
+  const chkAll = document.getElementById("all");
+  var evtSource;
+  chkAll.addEventListener("change", (e) => {
+    const checkBoxes = document.querySelectorAll(
+      "#mainView input[type=checkbox]"
+    );
+
+    //if(chkAll.checked){
+    checkBoxes.forEach((chk) => {
+      chk.checked = chkAll.checked;
+    });
+  });
+  function setStatus(data) {
+    const { id, status, fileSize, currentSize } = data;
+    const div = document.getElementById(id);
+    const badge = div.querySelector(`.badge`);
+    const chk = div.querySelector(`input[type=checkbox]`);
+
+    // 0 - warning
+    // 1 - success
+    // 2 - primary
+    // 3 - danger
+    switch (status) {
+      case 0:
+        badge.classList.remove('badge-warning');
+        badge.classList.remove('badge-success');
+        badge.classList.remove('badge-primary');
+        badge.classList.remove('badge-danger');
+        badge.classList.add('badge-warning');
+        break;
+      case 1:
+
+
+        badge.classList.remove('badge-warning');
+        badge.classList.remove('badge-success');
+        badge.classList.remove('badge-primary');
+        badge.classList.remove('badge-danger');
+        badge.classList.add('badge-success');
+        badge.textContent = `Loading... ${Number((+currentSize) / (+fileSize)).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 })}`
+        break;
+      case 2:
+        console.log(2, data);
+
+        badge.classList.remove('badge-warning');
+        badge.classList.remove('badge-success');
+        badge.classList.remove('badge-primary');
+        badge.classList.remove('badge-danger');
+        badge.classList.add('badge-primary');
+        badge.textContent = `Done`;
+        chk.remove();
+        break;
+      case 3:
+        console.log(3, data);
+        badge.classList.remove('badge-warning');
+        badge.classList.remove('badge-success');
+        badge.classList.remove('badge-primary');
+        badge.classList.remove('badge-danger');
+        badge.classList.add('badge-danger');
+        badge.textContent = `Error`;
+        break;
+      default:
+        break;
+    }
+  }
+  const dlBtn = document.getElementById("download");
+  dlBtn.addEventListener("click", (e) => {
+    const checkBoxes = document.querySelectorAll(
+      "#mainView input[type=checkbox]:checked"
+    );
+    const data = [];
+    checkBoxes.forEach((chk) => {
+      data.push({
+        book: { id, name, rdir, category, href },
+        ...getEpisode(chk.value),
+      });
+    });
+
+    fetch("http://localhost:3000/api/addTasks", {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data), // body data type must match "Content-Type" header
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        $("#status").append(data.message);
+
+        const url = `http://localhost:3000/api/status`;
+        const evtSource = new EventSource(url);
+        evtSource.onmessage = (event) => {
+          const d = JSON.parse(event.data);
+
+          if (d.id) {
+            setStatus(d);
+            getStat();
+          }
+        };
+      });
+  });
+
+  const { id, name, rdir, category, href } = Util.getUrlVars();
+
+  var eList = [];
+  //  loading book list
+  const url = `http://localhost:3000/api/fetchBookInfo?${Util.createParams({
+    id,
+    name,
+    rdir,
+    category,
+    href,
+  })}`;
+  fetch(url)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.error) {
+        console.error(data.error);
+        $("#mainView").append(JSON.stringify(data.error));
+        return;
+      }
+      const list = (eList = data.list);
+
+      //const nlist = list.filter(l=>l.dld==false);
+      
+      var strHTML = "";
+      list.forEach((d, idx) => {
+        strHTML += `${idx % 4 == 0 ? '<div class="row">' : ""}${createInfo(
+          d
+        )}${idx % 4 == 3 ? "</div>" : ""}`;
+      });
+      $("#mainView").append(strHTML);
+      getStat();
+    });
+
+  function getEpisode(id) {
+    return eList.find((e) => e.id == id);
+  }
+  function createInfo(data) {
+    const { id, name, href, dld } = data;
+    return `<div class="col-xs">
+            <div class="card" style="min-width:16rem !important;font-size:.8rem;" id="${id}">
+                <div class="card-body">
+                    <div >${id}: ${name}<br><span class="badge badge-${dld ? "primary" : "warning"
+      }">${dld ? "Done" : "Not Yet"}</span>${dld ? "" : `<input type="checkbox" value="${data.id}">`}</div>
+                    <a href="http://localhost:3000/api/fetchEpisodeInfo?href=${href}" class="btn btn-primary" style="display:none;">Go somewhere</a>
+                    
+                </div>
+            </div>
+        </div>`;
+  }
+
+  function getStat(){
+    statDiv.textContent = `Need: ${document.querySelectorAll('.badge-warning').length}|
+    Downloading: ${document.querySelectorAll('.badge-success').length}|
+    Done: ${document.querySelectorAll('.badge-primary').length}|
+    Error: ${document.querySelectorAll('.badge-danger').length}`
+        
+  }
+</script>
+
+</html>
